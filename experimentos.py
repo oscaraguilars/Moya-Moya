@@ -66,6 +66,52 @@ def guardar_tiempos(filas):
     print(f'Tiempos guardados en {ruta}')
 
 
+def calcular_resumen(filas):
+    """
+    Calcula el tiempo promedio de cada configuración, el speedup y la eficiencia.
+
+    Speedup:    S_p = T_1 / T_p   (T_1 = tiempo promedio con 1 worker)
+    Eficiencia: E_p = S_p / p
+    """
+    # Agrupar los tiempos por configuración
+    tiempos = {}
+    for version, workers, prueba, tiempo in filas:
+        tiempos.setdefault((version, workers), []).append(tiempo)
+
+    promedios = {clave: sum(lista) / len(lista) for clave, lista in tiempos.items()}
+    if ('paralelo', 1) not in promedios:
+        raise ValueError('Para calcular el speedup hay que incluir 1 worker en --workers')
+    t1 = promedios[('paralelo', 1)]
+
+    resumen = []
+    for (version, workers), promedio in promedios.items():
+        speedup = t1 / promedio
+        eficiencia = speedup / workers
+        resumen.append([version, workers] + tiempos[(version, workers)] + [promedio, speedup, eficiencia])
+    return resumen
+
+
+def guardar_resumen(resumen, repeticiones):
+    ruta = os.path.join(CARPETA, 'resumen.csv')
+    encabezado = ['version', 'workers'] + [f'prueba_{i}' for i in range(1, repeticiones + 1)]
+    encabezado += ['promedio_s', 'speedup', 'eficiencia']
+    with open(ruta, 'w', newline='') as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow(encabezado)
+        for fila in resumen:
+            escritor.writerow(fila[:2] + [round(valor, 4) for valor in fila[2:]])
+    print(f'Resumen guardado en {ruta}')
+
+
+def mostrar_resumen(resumen):
+    print()
+    print(f'{"versión":<12}{"workers":>8}{"promedio (s)":>14}{"speedup":>10}{"eficiencia":>12}')
+    for fila in resumen:
+        version, workers = fila[0], fila[1]
+        promedio, speedup, eficiencia = fila[-3], fila[-2], fila[-1]
+        print(f'{version:<12}{workers:>8}{promedio:>14.3f}{speedup:>10.2f}{eficiencia:>12.2f}')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Experimentos secuencial vs paralelo')
     parser.add_argument('--n', type=int, default=10_000_000, help='cantidad de datos')
@@ -76,3 +122,7 @@ if __name__ == '__main__':
 
     filas = correr_experimentos(args.n, args.workers, args.repeticiones)
     guardar_tiempos(filas)
+
+    resumen = calcular_resumen(filas)
+    guardar_resumen(resumen, args.repeticiones)
+    mostrar_resumen(resumen)
