@@ -3,11 +3,60 @@
 ## Descripción
 Proyecto de Alto Rendimiento (HPC) que compara el procesamiento secuencial y paralelo utilizando Python (`concurrent.futures.ProcessPoolExecutor`) para evaluar el rendimiento, speedup y eficiencia al aplicar una función matemática sobre un conjunto de datos masivo.
 
+## Requisitos
+- Python 3.11 o superior
+- Módulos de la librería estándar (math, random, time, concurrent.futures)
+- matplotlib (para las gráficas)
+
+## Estructura del Proyecto
+- src/operacion.py: Define la función matemática f(x).
+- src/datos.py: Genera un conjunto de datos aleatorios con semilla fija.
+- src/secuencial.py: Módulo de procesamiento secuencial.
+- src/paralelo.py: Módulo de procesamiento paralelo con ProcessPoolExecutor.
+- main.py: Punto de entrada para probar la versión secuencial y medir tiempos.
+- test_paralelo.py: Verifica que la versión paralela dé el mismo resultado que la secuencial.
+- experimentos.py: Mide los tiempos con 1, 2 y 4 workers y guarda resultados/resumen.csv.
+- graficas.py: Genera las gráficas de tiempo, speedup y eficiencia en resultados/.
+
+## Cómo ejecutarlo
+```
+python3 main.py
+python3 test_paralelo.py
+python3 experimentos.py
+python3 graficas.py
+```
+
 ## GitFlow
 GitFlow es un modelo de ramificación (*branching*) para Git que define una estructura estricta de ramas basada en roles para gestionar el desarrollo de software de forma organizada:
 - **`main`**: Contiene exclusivamente código estable y listo para producción.
 - **`develop`**: Funciona como la rama principal de integración para todas las funcionalidades.
 - **`feature/*`**: Ramas individuales creadas a partir de `develop` para desarrollar características específicas de manera aislada antes de integrarse vía Pull Request.
+
+---
+
+### Resultados (Parte 3)
+
+10 millones de datos, promedio de 3 corridas por configuración (`python experimentos.py` y `python graficas.py`).
+
+| Versión | Tiempo (s) | Speedup | Eficiencia |
+|---|---|---|---|
+| Secuencial | 2.24 | – | – |
+| 1 worker | 2.21 | 1.00 | 1.00 |
+| 2 workers | 1.97 | 1.12 | 0.56 |
+| 4 workers | 1.30 | 1.70 | 0.43 |
+
+![Tiempo](resultados/tiempo.png)
+![Speedup](resultados/speedup.png)
+![Eficiencia](resultados/eficiencia.png)
+
+#### 1. ¿La ejecución paralela fue más rápida que la secuencial?
+Sí, pero no hubo mucha diferencia. La versión secuencial fue de 2.24 s, con 2 workers bajó a 1.97 s y con 4 a 1.3 s, casi la mitad del tiempo. Con 1 fue casi lo mismo que la secuencial, 2.21 s, porque no repartió el trabajo.
+
+#### 2. ¿Qué número de workers obtuvo el menor tiempo?
+4 workers, con 1.3 segundos en promedio.
+
+#### 3. ¿Duplicar el número de workers duplicó el rendimiento? ¿Por qué?
+No. De 1 a 2 workers solo subió a 1.12 y de 2 a 4 subió a 1.7; lo ideal serían 4. Por eso la eficiencia bajó a 0.56 con 2 y a 0.43 con 4. Esto es porque también repartir los trabajos cuesta cierta eficiencia, y se deben crear los procesos, y esto gasta tiempo.
 
 ---
 
