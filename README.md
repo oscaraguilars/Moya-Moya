@@ -1,3 +1,15 @@
+# Proyecto HPC - Primer Parcial (Moya-Moya)
+
+## Descripción
+Proyecto de Alto Rendimiento (HPC) que compara el procesamiento secuencial y paralelo utilizando Python (`concurrent.futures.ProcessPoolExecutor`) para evaluar el rendimiento, speedup y eficiencia al aplicar una función matemática sobre un conjunto de datos masivo.
+
+## GitFlow
+GitFlow es un modelo de ramificación (*branching*) para Git que define una estructura estricta de ramas basada en roles para gestionar el desarrollo de software de forma organizada:
+- **`main`**: Contiene exclusivamente código estable y listo para producción.
+- **`develop`**: Funciona como la rama principal de integración para todas las funcionalidades.
+- **`feature/*`**: Ramas individuales creadas a partir de `develop` para desarrollar características específicas de manera aislada antes de integrarse vía Pull Request.
+
+---
 
 ### Análisis y Preguntas Teóricas (Parte 2)
 
